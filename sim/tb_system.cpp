@@ -114,6 +114,7 @@ int main(int argc, char **argv) {
     int m1n = 0;
     std::vector<int16_t> audio;
     double next_sample = 0, per_sample = CLK / 48000.0;
+    int64_t acc = 0; int64_t acc_n = 0;
 
     std::vector<uint8_t> frame(W * H * 3, 0);
     int px = 0, frame_no = 0, kicks = 0;
@@ -149,7 +150,22 @@ int main(int argc, char **argv) {
             printf("FAULT CAPTURE at frame %d: kind %02x, pc0 %04x, pc1 %04x\n",
                    frame_no + 1, dut->f_kind, dut->f_pc0, dut->f_pc1);
         }
-        if (!wav_path.empty() && clk_n >= next_sample) { audio.push_back(dut->snd); next_sample += per_sample; }
+        // the WAV is the AY at MAME's level (silence -12288), clipped as MAME's
+        // WAV writer clips, so it compares with MAME's recording directly;
+        // the Pocket gets (this + 12288) / 2 (rtl/ay8912.sv).  Each sample
+        // is the mean over its 1/48000 s, not a point: the AY makes
+        // ultrasonic tones that a point sample folds into the audible band,
+        // where MAME's resampler filters them out.
+        if (!wav_path.empty()) {
+            acc += (int32_t)(dut->snd_mame << 14) >> 14;       // sign-extend 18 bits
+            acc_n++;
+            if (clk_n >= next_sample) {
+                int v = (int)(acc / acc_n);
+                audio.push_back((int16_t)std::max(-32768, std::min(32767, v)));
+                acc = 0; acc_n = 0;
+                next_sample += per_sample;
+            }
+        }
         if (edge && dut->de && px < W * H) {
             frame[3 * px + 0] = (dut->rgb >> 16) & 0xff;
             frame[3 * px + 1] = (dut->rgb >> 8) & 0xff;

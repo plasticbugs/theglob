@@ -36,6 +36,7 @@ module theglob_core (
     output logic        pix_ce, de,
 
     output logic signed [15:0] snd,
+    output logic signed [17:0] snd_mame,    // the AY sum at MAME's level (benches)
 
     // ---------------- bring-up (the panel in core_top, sim/)
     output logic        dbg_m1,         // one clock per opcode fetch, address on dbg_addr
@@ -198,20 +199,14 @@ module theglob_core (
     assign pix_ce = cen_pix;
 
     // ------------------------------------------------------------ sound (hardware.md 6)
-    // AY-3-8912: jt49 with its enable at the chip's own clock (sel = 1, no
-    // extra divide).  The 8912 has one I/O port and nothing is wired to it.
-    wire       ay_wr = wr_io && (wq_a[7:0] == 8'h02) && ay_active;
-    wire [9:0] ay_sound;
-    /* verilator lint_off PINCONNECTEMPTY */
-    jt49 u_ay (
-        .rst_n(!rst), .clk(clk), .clk_en(cen_ay),
-        .addr(ay_reg), .cs_n(!ay_wr), .wr_n(!ay_wr), .din(wq_d), .sel(1'b1),
-        .dout(), .sound(ay_sound), .A(), .B(), .C(), .sample(),
-        .IOA_in(8'hFF), .IOA_out(), .IOA_oe(), .IOB_in(8'hFF), .IOB_out(), .IOB_oe()
+    // AY-3-8912 written from MAME's model (rtl/ay8912.sv says why).  Its one
+    // I/O port is unconnected.
+    wire ay_wr = wr_io && (wq_a[7:0] == 8'h02) && ay_active;
+    ay8912 u_ay (
+        .clk(clk), .rst(rst), .cen(cen_ay),
+        .we(ay_wr), .addr(ay_reg), .din(wq_d),
+        .mame(snd_mame), .snd(snd)
     );
-    /* verilator lint_on PINCONNECTEMPTY */
-    // three channels summed, 0..1023 unsigned; centred and scaled to 16 bits
-    assign snd = 16'($signed({1'b0, ay_sound, 5'd0}) - 16'sd16384);
 
     // ------------------------------------------------------------ bring-up
     logic m1_n_d;

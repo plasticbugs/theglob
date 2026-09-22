@@ -911,7 +911,7 @@ module core_top
         .start1_n(g_start1_n), .start2_n(g_start2_n), .service_n(g_service_n), .coin(g_coin),
         .rgb(g_rgb), .hsync(g_hs), .vsync(g_vs),
         .hblank(g_hb), .vblank(g_vb), .pix_ce(g_pix_ce), .de(g_de),
-        .snd(g_snd),
+        .snd(g_snd), .snd_mame(),
         .dbg_m1(g_m1), .dbg_addr(g_pc), .dbg_halted(g_halted), .watchdog_kick(g_kick),
         .dbg_wr(g_wr), .dbg_wr_io(g_wr_io), .dbg_wr_addr(g_wr_addr), .dbg_wr_data(g_wr_data),
         .dbg_palette(g_out01)
@@ -1017,17 +1017,26 @@ module core_top
     //! handed over with a toggle flag, which is the only way the audio
     //! domain can be sure of a whole sample rather than a mix of two.
     //! ------------------------------------------------------------------
+    //! Each 48 kHz sample is the MEAN of the AY's output over its 1833
+    //! clocks, not one point of it: the game plays tones up to 43 kHz (a
+    //! period of 0), and a point sample folds those into the audible band as
+    //! loud, gritty tones MAME does not make (its resampler filters them).
+    //! The mean is sum * 9153 >> 24 (9153 / 2^24 = 1 / 1833.0 to 1.4e-5).
     localparam int SND_DIV = 1833;              // 88 MHz / 1833 = 48.009 kHz
     logic [11:0] snd_div = 12'd0;
+    logic signed [27:0] snd_acc = 28'sd0;
     logic signed [15:0] snd_hold = 16'sd0;
     logic        snd_tog = 1'b0;
+    wire  signed [42:0] snd_mean = snd_acc * 43'sd9153;
     always_ff @(posedge clk_sys) begin
         if (snd_div == 12'(SND_DIV - 1)) begin
             snd_div  <= 12'd0;
-            snd_hold <= g_snd;
+            snd_hold <= 16'(snd_mean >>> 24);
+            snd_acc  <= 28'(g_snd);
             snd_tog  <= ~snd_tog;
         end else begin
             snd_div <= snd_div + 12'd1;
+            snd_acc <= snd_acc + 28'(g_snd);
         end
     end
     logic [2:0] snd_tog_s = 3'd0;

@@ -26,6 +26,7 @@ module tb_system_top (
     output logic [23:0] rgb,
     output logic        de, pix_ce, vblank, hsync, vsync,
     output logic signed [15:0] snd,
+    output logic signed [17:0] snd_mame,
 
     output logic        wr, wr_io,
     output logic [15:0] wr_addr,
@@ -54,7 +55,7 @@ module tb_system_top (
         .dsw(dsw), .inputs(inputs),
         .start1_n(start1_n), .start2_n(start2_n), .service_n(service_n), .coin(coin),
         .rgb(rgb), .hsync(hsync), .vsync(vsync), .hblank(), .vblank(vblank),
-        .pix_ce(pix_ce), .de(de), .snd(snd),
+        .pix_ce(pix_ce), .de(de), .snd(snd), .snd_mame(snd_mame),
         .dbg_m1(m1), .dbg_addr(pc), .dbg_halted(halted), .watchdog_kick(watchdog_kick),
         .dbg_wr(wr), .dbg_wr_io(wr_io), .dbg_wr_addr(wr_addr), .dbg_wr_data(wr_data),
         .dbg_palette()
