@@ -927,7 +927,9 @@ module core_top
 
     //! ------------------------------------------------------------------
     //! The bring-up panel (rtl/dbg_overlay.sv, METHODOLOGY section 5.21), on
-    //! the modifier word's bit 3.  Four rows of 32 squares on the bottom
+    //! the modifier word's bit 3.  It is OFF the menu for release: the
+    //! gateware stays, and a bring-up session puts this entry back into
+    //! interact.json (a "check" at 0xF2000000, value 0x8, mask 0xFFFFFFF7).  Four rows of 32 squares on the bottom
     //! sixteen lines, green = 1, bit 31 of each row leftmost.  The raster
     //! runs while the machine is held in reset, so a black Pocket can still
     //! be read.  KEEP docs/bringup.md IN STEP WITH THIS: it is what the
@@ -1028,15 +1030,35 @@ module core_top
     logic signed [15:0] snd_hold = 16'sd0;
     logic        snd_tog = 1'b0;
     wire  signed [42:0] snd_mean = snd_acc * 43'sd9153;
+    logic signed [15:0] rv_in = 16'sd0;
+    logic        rv_ce = 1'b0;
     always_ff @(posedge clk_sys) begin
+        rv_ce <= 1'b0;
         if (snd_div == 12'(SND_DIV - 1)) begin
             snd_div  <= 12'd0;
-            snd_hold <= 16'(snd_mean >>> 24);
+            rv_in    <= 16'(snd_mean >>> 24);
+            rv_ce    <= 1'b1;
             snd_acc  <= 28'(g_snd);
-            snd_tog  <= ~snd_tog;
         end else begin
             snd_div <= snd_div + 12'd1;
             snd_acc <= snd_acc + 28'(g_snd);
+        end
+    end
+
+    //! Cabinet reverb (rtl/theglob_reverb.sv, from the Pleiads core): an
+    //! option on the Interact menu, 0xF2000000 bits 15-14, off by default.
+    //! Off passes the sample through with the same latency.  Its output is
+    //! what crosses to the audio clock, on its own out_tick.
+    wire signed [15:0] rv_out;
+    wire               rv_tick;
+    theglob_reverb u_reverb (
+        .clk(clk_sys), .reset(mem_init), .ce(rv_ce), .mode(mod_sw1[7:6]),
+        .in(rv_in), .out(rv_out), .out_tick(rv_tick)
+    );
+    always_ff @(posedge clk_sys) begin
+        if (rv_tick) begin
+            snd_hold <= rv_out;
+            snd_tog  <= ~snd_tog;
         end
     end
     logic [2:0] snd_tog_s = 3'd0;

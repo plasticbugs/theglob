@@ -1,245 +1,59 @@
 {
-    "interact": {
-        "magic": "APF_VER_1",
-        "variables": [
-            {
-                "name": "Reset Core",
-                "id": 0,
-                "type": "action",
-                "enabled": true,
-                "address": "0xF0000000",
-                "value": 1
-            },
-            {
-                "name": "Lives",
-                "id": 10,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF1000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFAF",
-                "options": [
-                    {
-                        "name": "3",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "4",
-                        "value": "0x00000010"
-                    },
-                    {
-                        "name": "5",
-                        "value": "0x00000040"
-                    },
-                    {
-                        "name": "6",
-                        "value": "0x00000050"
-                    }
-                ]
-            },
-            {
-                "name": "Difficulty",
-                "id": 11,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF1000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFD9",
-                "options": [
-                    {
-                        "name": "1 (easiest)",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "2",
-                        "value": "0x00000002"
-                    },
-                    {
-                        "name": "3",
-                        "value": "0x00000020"
-                    },
-                    {
-                        "name": "4",
-                        "value": "0x00000022"
-                    },
-                    {
-                        "name": "5",
-                        "value": "0x00000004"
-                    },
-                    {
-                        "name": "6",
-                        "value": "0x00000006"
-                    },
-                    {
-                        "name": "7",
-                        "value": "0x00000024"
-                    },
-                    {
-                        "name": "8 (hardest)",
-                        "value": "0x00000026"
-                    }
-                ]
-            },
-            {
-                "name": "Bonus Life",
-                "id": 12,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF1000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFF7",
-                "options": [
-                    {
-                        "name": "10K + 10K x diff.",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "90K + 10K x diff.",
-                        "value": "0x00000008"
-                    }
-                ]
-            },
-            {
-                "name": "Coinage",
-                "id": 13,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF1000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFFE",
-                "options": [
-                    {
-                        "name": "1 Coin 1 Credit",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "1 Coin 2 Credits",
-                        "value": "0x00000001"
-                    }
-                ]
-            },
-            {
-                "name": "Demo Sounds",
-                "id": 14,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF1000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFF7F",
-                "options": [
-                    {
-                        "name": "On",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "Off",
-                        "value": "0x00000080"
-                    }
-                ]
-            },
-            {
-                "name": "Screen Shape",
-                "id": 60,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFF9",
-                "options": [
-                    {
-                        "name": "Arcade 4:3",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "Square pixels",
-                        "value": "0x00000002"
-                    }
-                ]
-            },
-            {
-                "name": "Scanlines",
-                "id": 61,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF3000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFFFC",
-                "options": [
-                    {
-                        "name": "Off",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "25%",
-                        "value": "0x00000001"
-                    },
-                    {
-                        "name": "50%",
-                        "value": "0x00000002"
-                    },
-                    {
-                        "name": "75%",
-                        "value": "0x00000003"
-                    }
-                ]
-            },
-            {
-                "name": "Shadow Mask",
-                "id": 62,
-                "type": "list",
-                "enabled": true,
-                "persist": true,
-                "address": "0xF3000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFF8F",
-                "options": [
-                    {
-                        "name": "Off",
-                        "value": "0x00000000"
-                    },
-                    {
-                        "name": "1x",
-                        "value": "0x00000010"
-                    },
-                    {
-                        "name": "2x",
-                        "value": "0x00000020"
-                    },
-                    {
-                        "name": "3x",
-                        "value": "0x00000030"
-                    }
-                ]
-            },
-            {
-                "name": "Service Switch",
-                "id": 40,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "mask": "0xFFFFFEFF",
-                "value": "0x00000100"
-            },
-            {
-                "name": "Bring-up: panel",
-                "id": 90,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "value": "0x00000008",
-                "mask": "0xFFFFFFF7"
-            }
-        ]
-    }
+  "interact": {
+    "magic": "APF_VER_1",
+    "variables": [
+      {"name": "Reset Core", "id": 0, "type": "action", "enabled": true, "address": "0xF0000000", "value": 1},
+      {"name": "Lives", "id": 10, "type": "list", "enabled": true, "persist": true, "address": "0xF1000000", "defaultval": 0, "mask": "0xFFFFFFAF", "options": [
+        {"name": "3", "value": "0x00000000"},
+        {"name": "4", "value": "0x00000010"},
+        {"name": "5", "value": "0x00000040"},
+        {"name": "6", "value": "0x00000050"}
+      ]},
+      {"name": "Difficulty", "id": 11, "type": "list", "enabled": true, "persist": true, "address": "0xF1000000", "defaultval": 0, "mask": "0xFFFFFFD9", "options": [
+        {"name": "1 (easiest)", "value": "0x00000000"},
+        {"name": "2", "value": "0x00000002"},
+        {"name": "3", "value": "0x00000020"},
+        {"name": "4", "value": "0x00000022"},
+        {"name": "5", "value": "0x00000004"},
+        {"name": "6", "value": "0x00000006"},
+        {"name": "7", "value": "0x00000024"},
+        {"name": "8 (hardest)", "value": "0x00000026"}
+      ]},
+      {"name": "Bonus Life", "id": 12, "type": "list", "enabled": true, "persist": true, "address": "0xF1000000", "defaultval": 0, "mask": "0xFFFFFFF7", "options": [
+        {"name": "10K + 10K x diff.", "value": "0x00000000"},
+        {"name": "90K + 10K x diff.", "value": "0x00000008"}
+      ]},
+      {"name": "Coinage", "id": 13, "type": "list", "enabled": true, "persist": true, "address": "0xF1000000", "defaultval": 0, "mask": "0xFFFFFFFE", "options": [
+        {"name": "1 Coin 1 Credit", "value": "0x00000000"},
+        {"name": "1 Coin 2 Credits", "value": "0x00000001"}
+      ]},
+      {"name": "Demo Sounds", "id": 14, "type": "list", "enabled": true, "persist": true, "address": "0xF1000000", "defaultval": 0, "mask": "0xFFFFFF7F", "options": [
+        {"name": "On", "value": "0x00000000"},
+        {"name": "Off", "value": "0x00000080"}
+      ]},
+      {"name": "Screen Shape", "id": 60, "type": "list", "enabled": true, "persist": true, "address": "0xF2000000", "defaultval": 0, "mask": "0xFFFFFFF9", "options": [
+        {"name": "Arcade 4:3", "value": "0x00000000"},
+        {"name": "Square pixels", "value": "0x00000002"}
+      ]},
+      {"name": "Scanlines", "id": 61, "type": "list", "enabled": true, "persist": true, "address": "0xF3000000", "defaultval": 0, "mask": "0xFFFFFFFC", "options": [
+        {"name": "Off", "value": "0x00000000"},
+        {"name": "25%", "value": "0x00000001"},
+        {"name": "50%", "value": "0x00000002"},
+        {"name": "75%", "value": "0x00000003"}
+      ]},
+      {"name": "Shadow Mask", "id": 62, "type": "list", "enabled": true, "persist": true, "address": "0xF3000000", "defaultval": 0, "mask": "0xFFFFFF8F", "options": [
+        {"name": "Off", "value": "0x00000000"},
+        {"name": "1x", "value": "0x00000010"},
+        {"name": "2x", "value": "0x00000020"},
+        {"name": "3x", "value": "0x00000030"}
+      ]},
+      {"name": "Cabinet Reverb", "id": 63, "type": "list", "enabled": true, "persist": true, "address": "0xF2000000", "defaultval": 0, "mask": "0xFFFF3FFF", "options": [
+        {"name": "Off", "value": "0x00000000"},
+        {"name": "Light", "value": "0x00004000"},
+        {"name": "Medium", "value": "0x00008000"},
+        {"name": "Heavy", "value": "0x0000C000"}
+      ]},
+      {"name": "Service Switch", "id": 40, "type": "check", "enabled": true, "persist": false, "address": "0xF2000000", "defaultval": 0, "mask": "0xFFFFFEFF", "value": "0x00000100"}
+    ]
+  }
 }
