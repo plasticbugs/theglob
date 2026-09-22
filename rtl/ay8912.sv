@@ -131,13 +131,17 @@ module ay8912 (
     always_comb begin
         logic sa, sb, sc;
         logic [3:0] ev;
+        logic signed [15:0] cha, chb, chc;
         ev = e_step ^ e_attack;
         sa = (t_out0 | r_enable[0]) & (rng[0] | r_enable[3]);
         sb = (t_out1 | r_enable[1]) & (rng[0] | r_enable[4]);
         sc = (t_out2 | r_enable[2]) & (rng[0] | r_enable[5]);
-        mix = 18'(r_avol[4] ? env_table(sa ? ev : 4'd0) : vol_table(sa ? r_avol[3:0] : 4'd0))
-            + 18'(r_bvol[4] ? env_table(sb ? ev : 4'd0) : vol_table(sb ? r_bvol[3:0] : 4'd0))
-            + 18'(r_cvol[4] ? env_table(sc ? ev : 4'd0) : vol_table(sc ? r_cvol[3:0] : 4'd0));
+        // each channel's 16-bit level picked first, then widened: the older
+        // lint in CI flags a 16-bit function result widened inside ?:
+        cha = r_avol[4] ? env_table(sa ? ev : 4'd0) : vol_table(sa ? r_avol[3:0] : 4'd0);
+        chb = r_bvol[4] ? env_table(sb ? ev : 4'd0) : vol_table(sb ? r_bvol[3:0] : 4'd0);
+        chc = r_cvol[4] ? env_table(sc ? ev : 4'd0) : vol_table(sc ? r_cvol[3:0] : 4'd0);
+        mix = 18'(cha) + 18'(chb) + 18'(chc);
     end
 
     always_ff @(posedge clk) begin

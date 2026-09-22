@@ -1,3 +1,9 @@
+// theglob: the Z80's refresh register R is compiled in.  Upstream leaves it
+// behind TV80_REFRESH, and without it R never counts and LD A,R reads 0 --
+// which this game uses as its random number for the enemies (3587-3672).
+// Defined here rather than on each tool's command line, so no tool and no
+// file order can build without it.  modules/VENDOR.md records this edit.
+`define TV80_REFRESH
 //
 // TV80 8-Bit Microprocessor Core
 // Based on the VHDL T80 core by Daniel Wallner (jesus@opencores.org)
