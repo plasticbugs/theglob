@@ -1053,16 +1053,29 @@ module core_top
     wire               rv_tick;
     //! DC blocker first (rtl/dc_block.sv): the AY reaches here never
     //! negative, and a note starting or stopping moved the whole level in one
-    //! step -- the thump at each end of the jump sound.  Then the reverb.
+    //! step -- the thump at each end of the jump sound.  Then the Audio
+    //! Filter, then the reverb.
     wire signed [15:0] dcb_out;
     wire               dcb_tick;
     dc_block u_dcb (
         .clk(clk_sys), .reset(mem_init), .ce(rv_ce), .in(rv_in),
         .out(dcb_out), .out_tick(dcb_tick)
     );
+    //! Audio Filter (rtl/lowpass.sv): 0xF2000000 bits 17-16, the edges of
+    //! the game's 42 Hz squares heard as ticks.  The menu word's power-up
+    //! zero is Light, the default: menu 0 -> mode 1 Light, 1 -> 0 Off,
+    //! 2 -> 2 Medium.
+    wire [1:0] lp_menu = mod_sw2[1:0];
+    wire [1:0] lp_mode = (lp_menu == 2'd0) ? 2'd1 : (lp_menu == 2'd1) ? 2'd0 : 2'd2;
+    wire signed [15:0] lp_out;
+    wire               lp_tick;
+    lowpass u_lp (
+        .clk(clk_sys), .reset(mem_init), .ce(dcb_tick), .mode(lp_mode),
+        .in(dcb_out), .out(lp_out), .out_tick(lp_tick)
+    );
     theglob_reverb u_reverb (
-        .clk(clk_sys), .reset(mem_init), .ce(dcb_tick), .mode(mod_sw1[7:6]),
-        .in(dcb_out), .out(rv_out), .out_tick(rv_tick)
+        .clk(clk_sys), .reset(mem_init), .ce(lp_tick), .mode(mod_sw1[7:6]),
+        .in(lp_out), .out(rv_out), .out_tick(rv_tick)
     );
     always_ff @(posedge clk_sys) begin
         if (rv_tick) begin

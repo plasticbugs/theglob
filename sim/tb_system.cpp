@@ -5,7 +5,7 @@
 //
 //   obj_system/Vtb_system_top <rom> [-frames N] [-snap a,b,c] [-o DIR]
 //       [-coin F] [-start F] [-play] [-service] [-dsw HEX]
-//       [-trace FILE [-times]] [-wav FILE] [-fast] [-gap N] [-hold N] [-pause a-b]
+//       [-trace FILE [-times]] [-wav FILE [-pocketwav FILE]] [-fast] [-gap N] [-hold N] [-pause a-b]
 //
 // Frame N here is MAME's frame N: both count vblank starts from power-on, and
 // the controls change at the start of vblank of the frame the script names,
@@ -15,6 +15,9 @@
 // -trace writes every CPU write, in order, as "M aaaa dd" (memory) or
 // "O aa dd" (I/O), with "F n" as each vblank begins: the format
 // tools/trace_writes.lua writes from MAME.
+// -pocketwav writes the AY's Pocket-level output (snd), averaged per 48 kHz
+// sample as core_top averages it, before core_top's DC blocker, filter and
+// reverb.  Needs -wav as well.
 // -times appends each write's time in CPU cycles since reset (the Z80 at
 // 2.75 MHz, one per 32 clocks), which TIMES=1 gives the MAME trace too.
 // -fast writes the image at a byte a clock instead of the loader's rate
@@ -45,6 +48,7 @@ int main(int argc, char **argv) {
     int frames = 10, gap = 8, hold = 4, coin = -1, start = -1, pause_a = -1, pause_b = -1;
     unsigned dsw = 0x00;
     bool play = false, service = false, fast = false, times = false;
+    std::string pwav_path;
     std::string rom, out = ".", trace_path, wav_path;
     std::set<int> snaps;
     for (int i = 1; i < argc; i++) {
@@ -60,6 +64,7 @@ int main(int argc, char **argv) {
         else if (a == "-service") service = true;
         else if (a == "-fast") fast = true;
         else if (a == "-times") times = true;
+        else if (a == "-pocketwav") pwav_path = next();
         else if (a == "-dsw") dsw = strtoul(next().c_str(), nullptr, 16);
         else if (a == "-trace") trace_path = next();
         else if (a == "-wav") wav_path = next();
@@ -114,7 +119,8 @@ int main(int argc, char **argv) {
     int m1n = 0;
     std::vector<int16_t> audio;
     double next_sample = 0, per_sample = CLK / 48000.0;
-    int64_t acc = 0; int64_t acc_n = 0;
+    int64_t acc = 0; int64_t acc_n = 0, pacc = 0;
+    std::vector<int16_t> paudio;
 
     std::vector<uint8_t> frame(W * H * 3, 0);
     int px = 0, frame_no = 0, kicks = 0;
@@ -158,11 +164,13 @@ int main(int argc, char **argv) {
         // where MAME's resampler filters them out.
         if (!wav_path.empty()) {
             acc += (int32_t)(dut->snd_mame << 14) >> 14;       // sign-extend 18 bits
+            pacc += (int16_t)dut->snd;                          // the Pocket's level
             acc_n++;
             if (clk_n >= next_sample) {
                 int v = (int)(acc / acc_n);
                 audio.push_back((int16_t)std::max(-32768, std::min(32767, v)));
-                acc = 0; acc_n = 0;
+                paudio.push_back((int16_t)(pacc / acc_n));
+                acc = 0; acc_n = 0; pacc = 0;
                 next_sample += per_sample;
             }
         }
@@ -198,6 +206,7 @@ int main(int argc, char **argv) {
     }
     if (trace) fclose(trace);
     if (!wav_path.empty()) write_wav(wav_path, audio, 48000);
+    if (!pwav_path.empty()) write_wav(pwav_path, paudio, 48000);
     printf("%d frames, %ld CPU writes, %d watchdog kicks, halted %d, fault capture %s (%d events)\n",
            frames, writes, kicks, (int)dut->halted, dut->f_hit ? "HIT" : "quiet", dut->f_n);
     delete dut;
