@@ -19,7 +19,7 @@ cd "$(dirname "$0")/.."
 KNOWN='
 cpu-fx68k|https://github.com/ijor/fx68k|master||68000, cycle-accurate (GPL-3.0, Jorge Cwik)
 cpu-t80|https://github.com/MiSTer-devel/T80|master||Z80 (GPL-2.0-ish; see its header)
-cpu-tv80|https://github.com/hoglet67/tv80|master|rtl/core|Z80 (MIT, Guy Hutchison)
+cpu-tv80|https://github.com/hutch31/tv80|master|rtl/core|Z80 (MIT, Guy Hutchison)
 sound-jt12|https://github.com/jotego/jt12|master|hdl|YM2612/YM2203 family (GPL-3.0, Jose Tejada)
 sound-jt49|https://github.com/jotego/jt49|master|hdl|AY-3-8910 / YM2149 (GPL-3.0, Jose Tejada)
 sound-jt51|https://github.com/jotego/jt51|master|hdl|YM2151 (GPL-3.0, Jose Tejada)

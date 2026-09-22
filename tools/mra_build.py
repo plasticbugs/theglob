@@ -23,7 +23,10 @@ Nothing but Python 3 is required. The same .mra works with the standard MiSTer
 mra tools.
 
 Usage:
-    mra_build.py <file.mra> <romset.zip|romset_dir> [out.rom]
+    mra_build.py <file.mra> <romset.zip|romset_dir> [parent.zip ...] [out.rom]
+
+A clone whose files live partly in its parent's zip (a split set) is built by
+naming both zips; members are looked up in the order given.
 """
 import sys, os, zipfile, hashlib, zlib
 import xml.etree.ElementTree as ET
@@ -128,12 +131,16 @@ def do_interleave(parts, node):
     return f'interleave{width}[{labels}]', bytes(out)
 
 
-def build(mra_path, romset_path, verbose=False):
+def build(mra_path, romset_paths, verbose=False):
     tree = ET.parse(mra_path)
     rom = tree.getroot().find('rom')
     if rom is None:
         sys.exit('error: no <rom> element in the .mra')
-    parts = load_parts(romset_path)
+    if isinstance(romset_paths, str):
+        romset_paths = [romset_paths]
+    parts = {}
+    for path in reversed(romset_paths):     # the first named wins
+        parts.update(load_parts(path))
     image = bytearray()
     for node in rom:
         if node.tag == 'part':
@@ -155,11 +162,13 @@ def build(mra_path, romset_path, verbose=False):
 def main():
     if len(sys.argv) < 3:
         sys.exit(__doc__)
-    mra_path, romset_path = sys.argv[1], sys.argv[2]
+    mra_path, rest = sys.argv[1], sys.argv[2:]
     tree = ET.parse(mra_path)
     setname = tree.getroot().findtext('setname') or 'out'
-    out_path = sys.argv[3] if len(sys.argv) > 3 else f'{setname}.rom'
-    image, md5 = build(mra_path, romset_path, verbose=True)
+    out_path = f'{setname}.rom'
+    if len(rest) > 1 and rest[-1].lower().endswith('.rom'):
+        out_path = rest.pop()
+    image, md5 = build(mra_path, rest, verbose=True)
     with open(out_path, 'wb') as f:
         f.write(image)
     print(f'wrote {out_path}: {len(image)} bytes, md5 {md5}')
