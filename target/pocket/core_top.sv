@@ -1051,9 +1051,18 @@ module core_top
     //! what crosses to the audio clock, on its own out_tick.
     wire signed [15:0] rv_out;
     wire               rv_tick;
+    //! DC blocker first (rtl/dc_block.sv): the AY reaches here never
+    //! negative, and a note starting or stopping moved the whole level in one
+    //! step -- the thump at each end of the jump sound.  Then the reverb.
+    wire signed [15:0] dcb_out;
+    wire               dcb_tick;
+    dc_block u_dcb (
+        .clk(clk_sys), .reset(mem_init), .ce(rv_ce), .in(rv_in),
+        .out(dcb_out), .out_tick(dcb_tick)
+    );
     theglob_reverb u_reverb (
-        .clk(clk_sys), .reset(mem_init), .ce(rv_ce), .mode(mod_sw1[7:6]),
-        .in(rv_in), .out(rv_out), .out_tick(rv_tick)
+        .clk(clk_sys), .reset(mem_init), .ce(dcb_tick), .mode(mod_sw1[7:6]),
+        .in(dcb_out), .out(rv_out), .out_tick(rv_tick)
     );
     always_ff @(posedge clk_sys) begin
         if (rv_tick) begin
