@@ -19,5 +19,5 @@ SDL_VIDEODRIVER=dummy \
 exec mame theglob -rompath "$root/.mame/roms" \
     -video none -videodriver dummy -window -nomaximize \
     -sound none -nothrottle -skip_gameinfo \
-    -cfg_directory "$root/.mame/cfg" -nvram_directory "$root/.mame/nvram" \
+    -snapshot_directory "$root/.mame/snap" -cfg_directory "$root/.mame/cfg" -nvram_directory "$root/.mame/nvram" \
     "$@"
