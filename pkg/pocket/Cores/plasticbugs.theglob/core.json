@@ -3,12 +3,12 @@
     "magic": "APF_VER_1",
     "metadata": {
       "platform_ids": [
-        "mycore"
+        "theglob"
       ],
-      "shortname": "mycore",
-      "description": "My Core (MANUFACTURER, YEAR) arcade core",
+      "shortname": "theglob",
+      "description": "The Glob (MANUFACTURER, YEAR) arcade core",
       "author": "plasticbugs",
-      "url": "https://github.com/plasticbugs/analogue-pocket-mycore",
+      "url": "https://github.com/plasticbugs/analogue-pocket-theglob",
       "version": "0.0.1",
       "date_release": "1970-01-01"
     },
