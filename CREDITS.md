@@ -1,5 +1,20 @@
 # Credits
 
+## The Glob core
+
+* **MAME** — `misc/epos.cpp` by **Zsolt Vasvari** (the Tristar 8000 board:
+  memory map, I/O, the colour PROM's weights, the video), and
+  `sound/ay8910.cpp` by **Couriersud** (the AY-3-8910 model this core's
+  `rtl/ay8912.sv` is written from), whose active volume table comes from
+  **Matthew Westcott**'s published measurements of a real chip. Verbatim in
+  `ref/mame/`, BSD-3-Clause.
+* **Guy Hutchison** — tv80 (`modules/cpu-tv80`, MIT), from **Daniel
+  Wallner**'s VHDL T80.
+* The cabinet reverb (`rtl/theglob_reverb.sv`) is this author's, from the
+  Pleiads/Phoenix core by way of Punch-Out!! and Cloak & Dagger; the DC
+  blocker's form is from this author's BBC Micro core.
+
+
 A core built from this template is a small amount of new work sitting on a
 large amount of other people's. This file is the template's share of that debt;
 a core should extend it with its own — MAME's driver authors, the vendored CPU
