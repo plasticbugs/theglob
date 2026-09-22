@@ -11,6 +11,138 @@
                 "value": 1
             },
             {
+                "name": "Lives",
+                "id": 10,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF1000000",
+                "defaultval": 0,
+                "mask": "0xFFFFFFAF",
+                "options": [
+                    {
+                        "name": "3",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "4",
+                        "value": "0x00000010"
+                    },
+                    {
+                        "name": "5",
+                        "value": "0x00000040"
+                    },
+                    {
+                        "name": "6",
+                        "value": "0x00000050"
+                    }
+                ]
+            },
+            {
+                "name": "Difficulty",
+                "id": 11,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF1000000",
+                "defaultval": 0,
+                "mask": "0xFFFFFFD9",
+                "options": [
+                    {
+                        "name": "1 (easiest)",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "2",
+                        "value": "0x00000002"
+                    },
+                    {
+                        "name": "3",
+                        "value": "0x00000020"
+                    },
+                    {
+                        "name": "4",
+                        "value": "0x00000022"
+                    },
+                    {
+                        "name": "5",
+                        "value": "0x00000004"
+                    },
+                    {
+                        "name": "6",
+                        "value": "0x00000006"
+                    },
+                    {
+                        "name": "7",
+                        "value": "0x00000024"
+                    },
+                    {
+                        "name": "8 (hardest)",
+                        "value": "0x00000026"
+                    }
+                ]
+            },
+            {
+                "name": "Bonus Life",
+                "id": 12,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF1000000",
+                "defaultval": 0,
+                "mask": "0xFFFFFFF7",
+                "options": [
+                    {
+                        "name": "10K + 10K x diff.",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "90K + 10K x diff.",
+                        "value": "0x00000008"
+                    }
+                ]
+            },
+            {
+                "name": "Coinage",
+                "id": 13,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF1000000",
+                "defaultval": 0,
+                "mask": "0xFFFFFFFE",
+                "options": [
+                    {
+                        "name": "1 Coin 1 Credit",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "1 Coin 2 Credits",
+                        "value": "0x00000001"
+                    }
+                ]
+            },
+            {
+                "name": "Demo Sounds",
+                "id": 14,
+                "type": "list",
+                "enabled": true,
+                "persist": true,
+                "address": "0xF1000000",
+                "defaultval": 0,
+                "mask": "0xFFFFFF7F",
+                "options": [
+                    {
+                        "name": "On",
+                        "value": "0x00000000"
+                    },
+                    {
+                        "name": "Off",
+                        "value": "0x00000080"
+                    }
+                ]
+            },
+            {
                 "name": "Screen Shape",
                 "id": 60,
                 "type": "list",
@@ -25,7 +157,7 @@
                         "value": "0x00000000"
                     },
                     {
-                        "name": "Fill screen",
+                        "name": "Square pixels",
                         "value": "0x00000002"
                     }
                 ]
@@ -107,50 +239,6 @@
                 "defaultval": 0,
                 "value": "0x00000008",
                 "mask": "0xFFFFFFF7"
-            },
-            {
-                "name": "SDRAM read late",
-                "id": 91,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "value": "0x00000010",
-                "mask": "0xFFFFFFEF"
-            },
-            {
-                "name": "SDRAM slow bursts",
-                "id": 92,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "value": "0x00000020",
-                "mask": "0xFFFFFFDF"
-            },
-            {
-                "name": "SRAM read late",
-                "id": 93,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "value": "0x00000080",
-                "mask": "0xFFFFFF7F"
-            },
-            {
-                "name": "SRAM long writes",
-                "id": 94,
-                "type": "check",
-                "enabled": true,
-                "persist": false,
-                "address": "0xF2000000",
-                "defaultval": 0,
-                "value": "0x00008000",
-                "mask": "0xFFFF7FFF"
             }
         ]
     }

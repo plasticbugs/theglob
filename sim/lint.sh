@@ -43,10 +43,8 @@ done
 
 printf '%-20s ' "pocket memories"
 out=$(verilator --lint-only $OPTS "$WAIVE" --top-module theglob_mem \
-      "$root"/target/pocket/theglob_mem.sv "$root"/target/pocket/sdram_ctrl.sv \
-      "$root"/target/pocket/sram_port.sv 2>&1 \
-      | grep -E '^%(Error|Warning)' | grep -v 'Exiting due to' \
-      | grep -v 'sdram_ctrl.sv' || true)
+      "$root"/target/pocket/theglob_mem.sv 2>&1 \
+      | grep -E '^%(Error|Warning)' | grep -v 'Exiting due to' || true)
 if [ -z "$out" ]; then echo ok
 else echo; echo "$out" | sed 's/^/    /'; fail=1
 fi

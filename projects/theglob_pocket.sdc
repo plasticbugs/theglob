@@ -1,10 +1,10 @@
 # ==============================================================================
 # The Glob on the Pocket: timing constraints beyond the BSP's
-# sys_constr.sdc. The 96 MHz system clock, its 6.857 MHz video pair and the
-# shifted SDRAM clock all come from core_pll and are timed as one related
-# group; the two 74.25 MHz inputs and the audio PLL are asynchronous to it.
-# The PLL's fifth output drives nothing in core_top, so no clock of its own
-# reaches the netlist and it is not named here -- naming it only bought an
+# sys_constr.sdc. The 88 MHz system clock and its 5.5 MHz video pair come
+# from core_pll and are timed as one related group; the two 74.25 MHz inputs
+# and the audio PLL are asynchronous to it.  The PLL's fourth and fifth
+# outputs drive nothing in core_top, so no clock of theirs reaches the
+# netlist and they are not named here -- naming one only bought an
 # ignored-filter warning that hid the ones that mattered.
 # ==============================================================================
 set_clock_groups -asynchronous \
@@ -13,40 +13,11 @@ set_clock_groups -asynchronous \
  -group { clk_74b } \
  -group { ic|core_pll|core_pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk \
           ic|core_pll|core_pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk \
-          ic|core_pll|core_pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk \
-          ic|core_pll|core_pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk } \
+          ic|core_pll|core_pll_inst|altera_pll_i|general[2].gpll~PLL_OUTPUT_COUNTER|divclk } \
  -group { ic|pocket_audio_mixer|audio_pll|mf_audio_pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk } \
  -group { ic|pocket_audio_mixer|audio_pll|mf_audio_pll_inst|altera_pll_i|general[1].gpll~PLL_OUTPUT_COUNTER|divclk }
 
-# SDRAM: the chip is clocked by the phase-shifted PLL output (core_pll's
-# outclk_3).  The shift divides the budget between two checks that pull
-# opposite ways: the data the chip returns is captured by an I/O-cell register
-# on the core clock, and the address and command the core drives are captured
-# by the chip.  On the captured data, setup gets 2T - shift and hold gets
-# T - shift, so a nanosecond off the shift is a nanosecond onto setup and a
-# nanosecond off hold.
-#
-# THE SHIFT IS PER-DESIGN.  5.859 ns is where Master of Weapon's fit balanced
-# (setup slack = 6.241 - shift at slow 85C, hold slack = shift - 5.519 at fast
-# 0C); the board is the same for every core but the fit is not.  If the worst
-# path in a build is dram_dq[*] -> sdram_ctrl|dq_in[*], measure both slacks at
-# two shift values, solve for where they meet, and round to a multiple of
-# 130.2 ps, the step the 960 MHz VCO can make.  projects/report_worst.tcl
-# writes the reports to read: worst_paths*.txt for setup, worst_hold_fast.txt
-# for hold.  METHODOLOGY.md section 5.20.
-create_generated_clock -name dram_clk -source \
-    [get_pins {ic|core_pll|core_pll_inst|altera_pll_i|general[3].gpll~PLL_OUTPUT_COUNTER|divclk}] \
-    [get_ports {dram_clk}]
-set_input_delay -max -clock dram_clk 7.0 [get_ports {dram_dq[*]}]
-set_input_delay -min -clock dram_clk 2.5 [get_ports {dram_dq[*]}]
-set SDRAM_OUT [get_ports {dram_a[*] dram_ba[*] dram_cke dram_dqm[*] dram_dq[*] dram_ras_n dram_cas_n dram_we_n}]
-set_output_delay -max -clock dram_clk  1.5 $SDRAM_OUT
-set_output_delay -min -clock dram_clk -0.8 $SDRAM_OUT
-set_multicycle_path -setup 2 -from [get_clocks {dram_clk}] -to [get_registers {*|sdram_ctrl:*|dq_in[*]}]
-set_multicycle_path -setup 3 -from [get_registers {*|sdram_ctrl:*|last[*]}] -to [get_registers {*|sdram_ctrl:*|*}]
-set_multicycle_path -hold  2 -from [get_registers {*|sdram_ctrl:*|last[*]}] -to [get_registers {*|sdram_ctrl:*|*}]
-
-# The pixel hand-over to the 6.857 MHz video clock. The dot enable's phase is
+# The pixel hand-over to the 5.5 MHz video clock. The dot enable's phase is
 # pinned to clk_vid (core_top.sv's pix_sync into clk_enables.sv), so the
 # colour and sync registers are launched a fixed number of system clocks
 # before the clk_vid edge that samples them, and the setup check starts from
@@ -56,13 +27,11 @@ set VID_OUT [get_registers {ic|vr_q[*] ic|vg_q[*] ic|vb_q[*] ic|vhs_q ic|vvs_q i
 set_multicycle_path -setup 3 -start -from [get_clocks {ic|core_pll|core_pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}] -to $VID_OUT
 set_multicycle_path -hold  2 -start -from [get_clocks {ic|core_pll|core_pll_inst|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk}] -to $VID_OUT
 
-# SRAM: registered pins held for whole system cycles, a read sampled several
-# cycles after the address (target/pocket/sram_port.sv), so the pins are not
-# timed against a clock.
-set_false_path -to   [get_ports {sram_*}]
-set_false_path -from [get_ports {sram_dq[*]}]
-
-# The PSRAMs are unused on this board; the BSP still brings their pins out.
+# The SDRAM, the SRAM and the PSRAMs are unused on this board (the whole
+# machine is in block RAM); core_top ties their pins off, and the BSP still
+# brings them out.
+set_false_path -to   [get_ports {dram_* sram_*}]
+set_false_path -from [get_ports {dram_dq[*] sram_dq[*]}]
 set_false_path -to   [get_ports {cram0_* cram1_*}]
 set_false_path -from [get_ports {cram0_dq[*] cram1_dq[*] cram0_wait cram1_wait}]
 

@@ -1,16 +1,17 @@
 //------------------------------------------------------------------------------
-// Clock enables from the 96 MHz system clock (docs/core-design.md section 1).
+// Clock enables from the 88 MHz system clock (docs/core-design.md section 1).
 //
-// Every clock on the board's 24 MHz side is an exact divider of 96 MHz, so
-// these are plain counters with no fractional accumulator anywhere:
+// The board runs everything off one 11 MHz crystal, and 88 MHz is eight of
+// it, so every enable is a plain counter with no fractional accumulator and
+// no error against the board:
 //
-//   cen_phi1 / cen_phi2   fx68k's two phases, alternating, 12 MHz apiece
-//   cen_z80               6 MHz
-//   cen_ym                3 MHz
-//   cen_pix               the video dot clock, 96 / 14 = 6.857 MHz
+//   cen_cpu   Z80        11 / 4  = 2.75 MHz    88 / 32
+//   cen_ay    AY-3-8912  11 / 16 = 687.5 kHz   88 / 128
+//   cen_pix   dot clock  11 / 2  = 5.5 MHz     88 / 16
 //
-// The dot clock is the one thing that is not the board's: see the table in
-// docs/core-design.md for why, and what the raster totals do about it.
+// The rates are the board's; the phase between the CPU and the dot counter is
+// not (the dot divider follows clk_vid, the CPU divider stops for the menu).
+// Nothing on this board depends on it: the CPU never reads the raster.
 //------------------------------------------------------------------------------
 `default_nettype none
 
@@ -22,42 +23,34 @@ module clk_enables (
     // whatever phase the reset left it in, and the pixel handed to the video
     // clock could be sampled while it changes (METHODOLOGY section 5.4).
     input  logic pix_sync,
-    input  logic pause,     // hold both CPUs and the sound chip; see below
-    output logic cen_phi1,
-    output logic cen_phi2,
-    output logic cen_z80,
-    output logic cen_ym,
+    input  logic pause,     // hold the CPU and the sound chip; see below
+    output logic cen_cpu,
+    output logic cen_ay,
     output logic cen_pix
 );
-    logic [4:0] div;        // 0..31: the 68000, Z80 and YM2203 all divide this
-    logic [3:0] dpix;       // 0..13
+    logic [6:0] div;        // 0..127: the CPU and the AY divide this
+    logic [3:0] dpix;       // 0..15
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            div  <= 5'd0;
+            div  <= 7'd0;
             dpix <= 4'd0;
         end else begin
-            if (!pause) div <= div + 5'd1;
-            if (pix_sync)         dpix <= 4'd0;
-            else if (dpix == 4'd13) dpix <= 4'd0;
-            else                  dpix <= dpix + 4'd1;
+            if (!pause) div <= div + 7'd1;
+            if (pix_sync) dpix <= 4'd0;
+            else          dpix <= dpix + 4'd1;
         end
     end
 
-    // 96 / 8 = 12 MHz, the two phases half a CPU clock apart
     // Pausing freezes the divider and masks the enables with the same signal,
     // so every count still produces exactly one pulse: nothing is skipped and
-    // nothing fires twice, and fx68k's two phases come back in the order they
-    // stopped.  The dot divider is separate and keeps running, which is what
-    // leaves the picture on the screen behind the Pocket's menu.  (Cadash's
-    // fix, for Cadash's bug: the menu-open signal used to be ORed into reset,
-    // so opening the menu rebooted the game.)
+    // nothing fires twice.  The dot divider is separate and keeps running,
+    // which is what leaves the picture on the screen behind the Pocket's menu
+    // (the menu-open signal must never reach reset -- METHODOLOGY 5.5).
     wire run = !pause;
-    assign cen_phi1 = run && (div[2:0] == 3'd0);
-    assign cen_phi2 = run && (div[2:0] == 3'd4);
-    assign cen_z80  = run && (div[3:0] == 4'd2);    // 96 / 16 = 6 MHz
-    assign cen_ym   = run && (div      == 5'd6);    // 96 / 32 = 3 MHz
-    assign cen_pix  = (dpix     == 4'd0);       // 96 / 14 = 6.857 MHz
+    assign cen_cpu = run && (div[4:0] == 5'd0);
+    assign cen_ay  = run && (div      == 7'd0);
+    assign cen_pix = (dpix == 4'd0);
 endmodule
 
 `default_nettype wire

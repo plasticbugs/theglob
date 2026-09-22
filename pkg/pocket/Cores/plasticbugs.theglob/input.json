@@ -6,34 +6,39 @@
                 "type": "default",
                 "mappings": [
                     {
-                        "id": 100,
+                        "id": 200,
                         "name": "Button 2",
                         "key": "pad_btn_b"
                     },
                     {
-                        "id": 101,
-                        "name": "Button 1",
+                        "id": 201,
+                        "name": "Energy (Button 1)",
                         "key": "pad_btn_a"
                     },
                     {
-                        "id": 102,
+                        "id": 202,
                         "name": "Button 2 (alt)",
                         "key": "pad_btn_x"
                     },
                     {
-                        "id": 103,
-                        "name": "Button 1 (alt)",
+                        "id": 203,
+                        "name": "Energy (alt)",
                         "key": "pad_btn_y"
                     },
                     {
-                        "id": 104,
+                        "id": 204,
                         "name": "Coin",
                         "key": "pad_btn_select"
                     },
                     {
-                        "id": 105,
-                        "name": "Start",
+                        "id": 205,
+                        "name": "1 Player Start",
                         "key": "pad_btn_start"
+                    },
+                    {
+                        "id": 206,
+                        "name": "2 Players Start",
+                        "key": "pad_trig_r"
                     }
                 ]
             }

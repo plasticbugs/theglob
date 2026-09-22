@@ -6,3 +6,21 @@ set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "dbg_fault.sv"]
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "dbg_overlay.sv"]
 set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "theglob_core.sv"]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "theglob_video.sv"]
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $::quartus(qip_path) "z80_cpu.sv"]
+
+# modules/cpu-tv80 (see modules/VENDOR.md)
+set_global_assignment -name SEARCH_PATH [file join $::quartus(qip_path) "../modules/cpu-tv80"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/cpu-tv80/tv80_alu.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/cpu-tv80/tv80_core.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/cpu-tv80/tv80_mcode.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/cpu-tv80/tv80_reg.v"]
+
+# modules/sound-jt49 (see modules/VENDOR.md)
+set_global_assignment -name SEARCH_PATH [file join $::quartus(qip_path) "../modules/sound-jt49"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49_cen.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49_div.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49_eg.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49_exp.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49_noise.v"]
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) "../modules/sound-jt49/jt49.v"]

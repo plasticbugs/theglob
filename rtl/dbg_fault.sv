@@ -1,13 +1,12 @@
 //------------------------------------------------------------------------------
-// First-fault capture for hardware bring-up.
+// First-fault capture for hardware bring-up, for a Z80.
 //
-// Watches the 68000's bus from outside and freezes on the first exception
-// vector it fetches that a healthy run never does: anything in the vector
-// table other than the reset pair (0x00-0x07) and the two autovectors the
-// board uses, level 4 and 5 (0x70-0x77).  What is kept is which vector it
-// was, the two program addresses fetched just before it -- the prefetch runs
-// a word or two ahead, so the faulting instruction is at or just behind them
-// -- and the last address touched outside the ROM and main RAM.
+// Watches the opcode fetches (M1) and freezes on the first thing a healthy run
+// never does: an opcode fetched from outside the ROM (at or above 7800, work
+// RAM or VRAM) or the CPU halting.  sim/run_system.sh proves it quiet on a
+// healthy boot and firing on a sick one (a corrupted ROM image).  What is
+// kept is which it was, the two opcode addresses fetched before it, and how
+// many such events there have been.
 //
 // Whether those come out the same on every power-up is the point: the same
 // place every time is a logic or timing fault at one instruction, a different
@@ -18,38 +17,33 @@
 module dbg_fault (
     input  logic        clk,
     input  logic        rst,
-    input  logic [23:1] addr,
-    input  logic        bus,            // a bus cycle is in progress
+    input  logic        m1,             // one clock per opcode fetch
+    input  logic [15:0] addr,           // the fetch address while m1
+    input  logic        halted,
     output logic        hit,            // something was caught
-    output logic  [7:0] vec,            // low byte of the vector's address
-    output logic [23:0] pc0, pc1,       // latest and previous code fetch
-    output logic [23:0] io,             // last address outside ROM and RAM
-    output logic  [7:0] faults          // vector fetches since, saturating
+    output logic  [7:0] kind,           // 01 fetch outside ROM, 02 halt, 00 none
+    output logic [15:0] pc0, pc1,       // the fetch that faulted, and the one before
+    output logic  [7:0] faults          // events since, saturating
 );
-    logic        bus_d;
-    logic [23:0] h0, h1, hio;
-    wire         start   = bus && !bus_d;
-    wire [23:0]  a       = {addr, 1'b0};
-    wire         is_rom  = (addr[23:19] == 5'd0);
-    wire         is_ram  = (addr[23:14] == 10'b00_1000_0000);
-    wire         is_vec  = is_rom && (a[18:8] == 11'd0);
-    wire         benign  = (a[7:3] == 5'd0) || (a[7:3] == 5'b01110);   // 00-07, 70-77
-    wire         bad     = start && is_vec && !benign;
+    logic [15:0] h0;
+    logic        halted_d;
+    wire         bad_fetch = m1 && (addr >= 16'h7800);
+    wire         bad_halt  = halted && !halted_d;
+    wire         bad       = bad_fetch || bad_halt;
 
     always_ff @(posedge clk) begin
-        bus_d <= bus;
+        halted_d <= halted;
         if (rst) begin
-            hit <= 1'b0; faults <= '0; h0 <= '0; h1 <= '0; hio <= '0;
-            vec <= '0; pc0 <= '0; pc1 <= '0; io <= '0;     // a clean panel reads all zeros
+            hit <= 1'b0; faults <= '0; h0 <= '0;
+            kind <= '0; pc0 <= '0; pc1 <= '0;          // a clean panel reads all zeros
         end else begin
-            if (start) begin
-                if (is_rom && !is_vec) begin h1 <= h0; h0 <= a; end
-                else if (!is_rom && !is_ram) hio <= a;
-            end
-            // a vector is two words; count it once, on the even one
-            if (bad && !a[1] && !(&faults)) faults <= faults + 8'd1;
+            if (m1) h0 <= addr;
+            if (bad && !(&faults)) faults <= faults + 8'd1;
             if (bad && !hit) begin
-                hit <= 1'b1; vec <= a[7:0]; pc0 <= h0; pc1 <= h1; io <= hio;
+                hit  <= 1'b1;
+                kind <= bad_fetch ? 8'h01 : 8'h02;
+                pc0  <= bad_fetch ? addr : h0;
+                pc1  <= h0;
             end
         end
     end

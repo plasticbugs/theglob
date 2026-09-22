@@ -1,16 +1,18 @@
 The Glob
-MANUFACTURER, YEAR
+Epos Corporation, 1983
 
-One paragraph on what the game is and
-what is in the gateware. Plain
-characters only, 32 lines at most,
-* for bullets.
+Epos Tristar 8000 board: a Z80 at
+2.75 MHz, a 4-bit bitmap through a
+colour PROM, and an AY-3-8912.
 
 ROMs are not included. Build the image
 from your own MAME theglob romset with
 mra_build.py and theglob.mra, and copy
 it to Assets/theglob/common/theglob.rom
 
-* A / Y  button 1
-* B / X  button 2
-* Select coin, Start start
+* D-pad       move
+* A / Y       energy (button 1)
+* B / X       button 2
+* Select      coin
+* Start       1 player start
+* R shoulder  2 players start
