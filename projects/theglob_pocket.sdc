@@ -36,21 +36,19 @@ set_false_path -to   [get_ports {cram0_* cram1_*}]
 set_false_path -from [get_ports {cram0_dq[*] cram1_dq[*] cram0_wait cram1_wait}]
 
 # ------------------------------------------------------------------------------
-# Multicycle exceptions for clock-enabled blocks go here.  None are claimed
-# yet, because the skeleton has nothing that needs one.  Before adding any,
-# read METHODOLOGY.md sections 5.11 and 5.20:
-#
-#   * write down why EVERYTHING the filter matches qualifies, and register
-#     every input at the edge of the relaxed region;
-#   * a register Quartus merges into a block RAM's output no longer exists by
-#     name, the filter matches nothing, and the line is ignored with a warning
-#     -- CI fails the build on that (Check every constraint was applied);
-#   * a block RAM read closes on one clock.  Leave it alone.
-#
-# The shape the sibling cores use, proven on hardware, for a CPU that steps on
-# clock enables four or more system clocks apart:
-#
-#   set M68K [get_keepers {*|fx68k:*|*}]
-#   set_multicycle_path -setup 4 -from $M68K -to $M68K
-#   set_multicycle_path -hold  3 -from $M68K -to $M68K
-# ------------------------------------------------------------------------------
+# The Z80 (rtl/z80_cpu.sv around modules/cpu-tv80) steps on cen_cpu, one
+# system clock in 32 (rtl/clk_enables.sv).  Why EVERYTHING this filter matches
+# qualifies (METHODOLOGY 5.11), checked in the source:
+#   * every sequential block in tv80_core.v is inside `if (ClkEn)` (ClkEn =
+#     cen && ~BusAck) or `if (cen)`, apart from its asynchronous reset;
+#   * tv80_reg.v writes RegsH/RegsL only under CEN;
+#   * z80_cpu.sv's own strobe registers and di_reg step only on cen.
+# So a path that starts and ends inside z80_cpu has 32 clocks; 4 is claimed,
+# which is ample (the worst such path is ~12.1 ns) and far from the edge.
+# Paths INTO the CPU -- the read-data mux from the block RAMs and ports, and
+# INT -- start outside it, are not matched, and stay single-cycle, as do
+# paths OUT of it into the RAM address and write registers.  Anything added
+# inside z80_cpu later must be cen-gated too, or it does not belong there.
+set Z80 [get_keepers {*|z80_cpu:u_cpu|*}]
+set_multicycle_path -setup 4 -from $Z80 -to $Z80
+set_multicycle_path -hold  3 -from $Z80 -to $Z80
