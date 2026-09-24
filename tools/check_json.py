@@ -181,7 +181,30 @@ def main(argv):
                     fault(path, f'slot id {i} used twice')
                 seen[i] = s.get('name')
                 if s.get('required') and not s.get('filename'):
-                    fault(path, f'slot {i} is required but names no filename')
+                    # The instance pattern (the Pleiads core's, run on
+                    # hardware): slot 0 takes a .json instance from
+                    # Assets/<platform>/<core>/, and each instance names the
+                    # file for the other slots.  Then a required slot's name
+                    # comes from every instance, which is checked here.
+                    core_dir = os.path.dirname(path)
+                    core_id = os.path.basename(core_dir)
+                    plat = os.path.basename(os.path.dirname(os.path.dirname(core_dir)))
+                    inst_dir = os.path.join(os.path.dirname(os.path.dirname(core_dir)),
+                                            'Assets', core_id.split('.', 1)[-1], core_id)
+                    inst = sorted(f for f in os.listdir(inst_dir) if f.endswith('.json')) \
+                        if os.path.isdir(inst_dir) else []
+                    if 'json' in s.get('extensions', []) and inst:
+                        continue                    # this is the instance slot
+                    if not inst:
+                        fault(path, f'slot {i} is required but names no filename, '
+                                    f'and there are no instance JSONs in {inst_dir}')
+                        continue
+                    for f in inst:
+                        ij = json.load(open(os.path.join(inst_dir, f)))
+                        names = {x.get('id'): x.get('filename')
+                                 for x in ij.get('instance', {}).get('data_slots', [])}
+                        if not names.get(i):
+                            fault(os.path.join(inst_dir, f), f'names no file for required slot {i}')
 
     for f in bad:
         print('  ' + f)

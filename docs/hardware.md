@@ -164,3 +164,32 @@ mode, a palette-bank write of 1.
   with this PROM either way.
 - The monitor orientation on the Pocket (`rotation` in `video.json`) is a
   prediction until someone looks at it on hardware.
+
+## 11. Super Glob (`suprglob`)
+
+The parent set, on the same board: MAME gives it the same machine config
+(`tristar8000`), the same input ports (`suprglob` -- theglob uses them) and the
+same colour PROM (`82s123.u66`). Only the program differs: u10 c0141324, u9
+58be8128, u8 6d088c16, u7 b2768203, u6 976c8f46, u5 340f5290, u4 173bd589,
+u11 d45b740d -- 27,325 of 30,720 bytes differ from The Glob's. `suprglob.mra`
+builds it in The Glob's layout; `tools/verify_rom.py` finds both regions
+byte-identical to MAME's.
+
+Probed in MAME over 40 s of attract and play, as in section 9: IN 00, 01, 02
+only; OUT 00, 01 (00, 01, 04: lamps and the coin counter, never the palette
+bank), 02, 03, 06; IM 1; LD A,R at eight places (3867-3952), so it depends on
+the refresh register as The Glob does.
+
+MAME's note that its colour test splits the screen between the two palette
+banks with a busy loop is not emulated there; the core, which scans VRAM live,
+would draw the split, and it makes no difference with this PROM, whose halves
+are identical.
+
+**Tearing.** Super Glob writes VRAM while the picture is being drawn (its boot
+memory test continuously, and here and there in attract). The core reads VRAM
+live, as the board does, so a line below the beam's position at the write
+shows the new bytes; MAME draws the whole frame from VRAM at vblank and does
+not. Measured: at frames 200 and 1000 the core differs from MAME on 61 and 12
+lines, and every one of them is the previous frame's line, the next frame's,
+or a split between the two at one point -- nothing else. The Glob writes VRAM
+only in vblank, and shows no such lines.

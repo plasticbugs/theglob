@@ -16,11 +16,17 @@ verilator --cc --exe --build -j "${JOBS:-8}" -O2 -Wall -Wno-DECLFILENAME -Wno-UN
     || { tail -40 obj_video.log; exit 1; }
 out="$root/.build/video"
 mkdir -p "$out"
-python3 "$root/tools/render_model.py" "$rom" "$root"/sim/states/state_*.bin -o "$out" > "$out/model.log" \
-    || { cat "$out/model.log"; echo "the model itself no longer matches MAME"; exit 1; }
+# Each state renders into a directory of its own: the renderer names its
+# files by frame number, and two states (one per game) can share one -- which
+# once made a Super Glob state be judged against The Glob's pens.
 fail=0
 for s in "$root"/sim/states/state_*.bin; do
+    d="$out/$(basename "$s" .bin)"
+    mkdir -p "$d"
+    python3 "$root/tools/render_model.py" "$rom" "$s" -o "$d" > "$d/model.log" \
+        || { cat "$d/model.log"; echo "the model itself no longer matches MAME: $s"; exit 1; }
     n=$(python3 -c "import struct,sys; print('%05d' % struct.unpack('<I', open(sys.argv[1],'rb').read()[8:12])[0])" "$s")
-    ./obj_video/Vtb_video_top "$s" "$out/pens_$n.bin" "$out/rtl_$n.pens" || fail=1
+    printf '%-28s ' "$(basename "$s" .bin)"
+    ./obj_video/Vtb_video_top "$s" "$d/pens_$n.bin" "$d/rtl_$n.pens" || fail=1
 done
 [ $fail = 0 ] && echo "video gate: PASS" || { echo "video gate: FAIL"; exit 1; }

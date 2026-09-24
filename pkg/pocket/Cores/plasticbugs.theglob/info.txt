@@ -1,11 +1,11 @@
-The Glob
+The Glob / Super Glob
 Epos Corporation, 1983
 
 Eat the snacks, dodge the frogs, ride
-the elevators. The Epos Tristar 8000
-board: a Z80 at 2.75 MHz, a bitmap
-through a colour PROM, an AY-3-8912.
-Checked against MAME frame by frame.
+the elevators. Both games run on the
+Epos Tristar 8000 board: a Z80, a
+bitmap through a colour PROM and an
+AY-3-8912. Checked against MAME.
 
 * D-pad       move
 * A / Y       energy (button 1)
@@ -14,17 +14,14 @@ Checked against MAME frame by frame.
 * Start       1 player start
 * R shoulder  2 players start
 
-Menu: lives, difficulty, bonus life,
-coinage and demo sounds are the
-board's DIP switches. Audio Filter
-(Light by default) softens the ticks
-of the jump sound; Cabinet Reverb
-adds a room. Service Switch opens the
-game's own diagnostics.
+Menu: the board's DIP switches, Audio
+Filter (Light by default) for the
+jump sound's ticks, Cabinet Reverb,
+and the game's own diagnostics.
 
-ROMs are not included. Build the image
-from your own MAME theglob romset
-(the parent suprglob's colour PROM is
-needed too) with mra_build.py and
-theglob.mra, and copy it to
-Assets/theglob/common/theglob.rom
+ROMs are not included. Build them
+from your own MAME romsets with
+mra_build.py and theglob.mra or
+suprglob.mra, and copy theglob.rom
+and/or suprglob.rom to
+Assets/theglob/common/

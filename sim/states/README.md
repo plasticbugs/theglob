@@ -13,3 +13,8 @@ the renderer's pens exactly.
 | state_02400, 03600, 04800 | gameplay, level 1, enemies on screen | COIN=2000 START=2060, scripted joystick |
 | state_svc_00600 | service-mode menu | SERVICE=1 |
 | state_ctab_01100 | service mode colour table, pen 08 | SERVICE=1, PRESS as in the commit that added it |
+| state_sg_01400 | Super Glob attract ("PUSH CALL BUTTON TO RIDE ELEVATORS") | GAME=suprglob, power-on |
+| state_sg_svc_00600 | Super Glob service menu (10 entries) | GAME=suprglob SERVICE=1 |
+
+The two games share the board and the colour PROM, so every state renders with
+either image's PROM (`sim/run_video.sh` uses .build/theglob.rom's).

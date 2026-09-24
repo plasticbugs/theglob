@@ -1,14 +1,18 @@
-# The Glob — Analogue Pocket core (openFPGA)
+# The Glob / Super Glob — Analogue Pocket core (openFPGA)
 
-The Glob (Epos Corporation, 1983) on the Epos **Tristar 8000** board, as
+**The Glob** and **Super Glob** (Epos Corporation, 1983) on the Epos
+**Tristar 8000** board, as
 MAME's `misc/epos.cpp` describes it: a Z80 at 2.75 MHz, a 272 × 236,
 4-bit-per-pixel bitmap resolved through a 32-byte colour PROM, and an
 AY-3-8912. The whole board is in the gateware and in block RAM; the Pocket's
 SDRAM and SRAM are not used.
 
-This is MAME's `theglob` set (`globu4`–`globu11.bin` plus `82s123.u66` from
-the parent `suprglob`), **not** the Pac-Man conversion kit `theglobp`, which
-is a different romset on different hardware.
+Two games, one board: MAME's `theglob` and its parent `suprglob` share the
+machine, the inputs, the DIP switches and the colour PROM, and differ only in
+their program, so the gateware is the same for both. Choosing Run on the
+Pocket lists them by name (one instance JSON each, the Pleiads core's pattern);
+each loads its own image. These are **not** the Pac-Man conversion kits
+`theglobp` / `sprglobp`, which are different romsets on different hardware.
 
 > **ROMs are not included and never will be.** You supply your own MAME
 > romset; the core reads one image built from it (below).
@@ -19,14 +23,16 @@ is a different romset on different hardware.
 | bitmap video + colour PROM | `rtl/theglob_video.sv` | 0 differing pens against `tools/render_model.py` on 8 frozen MAME states (boot, attract, play, service menu, colour table) — and the renderer 0 pixels from MAME on 22 frames (`sim/run_video.sh`); whole machine 0 RGB pixels from MAME at frames 500 and 800 |
 | AY-3-8912 @ 687.5 kHz | `rtl/ay8912.sv`, written from MAME's `ay8910.cpp` | all 16 volume levels measured in MAME to a flat 0.994; whole core against MAME's recording over 25 s of play, level per second within 0.99–1.03 in every second with sound (`tools/audio_seconds.py`) |
 | Pocket audio path | `rtl/dc_block.sv`, `rtl/lowpass.sv`, `rtl/theglob_reverb.sv` in `target/pocket/core_top.sv` | each bit-exact to its Python model on 1,188,898 samples of this game's audio, every mode; reverb never at the rails (`sim/run_reverb.sh`) |
-| ROM, 30 KB + PROM | block RAM, loaded by `target/pocket/theglob_mem.sv` | image byte-identical to MAME's regions (`tools/verify_rom.py`); download at the loader's rate, strobe held 1, 4 and 7 clocks, every byte back and checksum EF35 (`sim/run_mem.sh`) |
+| ROM, 30 KB + PROM | block RAM, loaded by `target/pocket/theglob_mem.sv` | both images byte-identical to MAME's regions (`tools/verify_rom.py`); download at the loader's rate, strobe held 1, 4 and 7 clocks, every byte back and checksum EF35 / 94E5 (`sim/run_mem.sh`) |
+| Super Glob | the same gateware, `suprglob.mra` | write trace from reset equal in count to MAME's (879,403), the first 497,070 exactly, then only IRQ-timing clusters; boot, attract, play and a 10-entry service mode rendered 0 px from MAME; service mode 0 px in the core. Where Super Glob writes VRAM mid-frame the core tears as the board does and MAME does not (`docs/hardware.md` 11) |
 | timing | 88 MHz (8 × the board's 11 MHz), 5.5 MHz dot clock | closed at every corner in a local Quartus 18.1 compile |
 
 ## Status
 
 **It runs on a Pocket.** Builds have been played on hardware throughout, and
 the 0.1.0 bitstream is the exact file flashed for the last round of testing
-(md5 `677049b3400324451691601d0796593e`), not a rebuild.
+(md5 `677049b3400324451691601d0796593e`), not a rebuild. Super Glob is new
+since then and has been checked in simulation only.
 
 What the hardware found that no bench had:
 
@@ -62,19 +68,24 @@ Reverb (Off / Light / Medium / Heavy), screen shape, scanlines and shadow
 mask, and the Service Switch for the game's own diagnostics — including a
 colour table and a convergence crosshatch.
 
-## Building the ROM image
+## Building the ROM images
 
 ```sh
-python3 mra_build.py theglob.mra theglob.zip
-python3 mra_build.py theglob.mra theglob.zip suprglob.zip   # a split set
+python3 mra_build.py theglob.mra  theglob.zip                 # -> theglob.rom
+python3 mra_build.py suprglob.mra suprglob.zip                # -> suprglob.rom
+python3 mra_build.py theglob.mra  theglob.zip suprglob.zip    # The Glob from a split set
 ```
+
+A merged `suprglob.zip` carries its clones too, so it builds both images on
+its own: `python3 mra_build.py theglob.mra suprglob.zip`.
 
 The builder needs only Python 3. It reads the MAME zip (or a directory of
 loose files), checks every ROM's CRC32, and verifies the finished image
 against a known md5. The colour PROM belongs to the parent set `suprglob`: a
 merged or non-merged `theglob.zip` has it, a split one does not, and then the
-builder names the missing file — give it the parent zip too. Copy the result
-to `Assets/theglob/common/theglob.rom` on the SD card.
+builder names the missing file — give it the parent zip too. Copy the
+results to `Assets/theglob/common/` on the SD card as `theglob.rom` and
+`suprglob.rom`; either one alone is enough for its own game.
 
 ## Building the core
 

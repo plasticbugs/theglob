@@ -833,10 +833,14 @@ module core_top
     always_ff @(posedge clk_sys) if (allc_s) loaded <= 1'b1;
     wire  g_reset = reset_sw_s | ~loaded | mem_init;
 
-    //! ROM: one slot with the flat image tools/mra_build.py makes from
-    //! theglob.mra.  Its layout is in target/pocket/theglob_mem.sv; change the
-    //! two together.
-    wire        ioctl_isROM = ioctl_download && ioctl_index == 16'h0;
+    //! ROM: slot 1, the flat image tools/mra_build.py makes from theglob.mra
+    //! or suprglob.mra -- the same board and the same layout, so the gateware
+    //! does not need to know which game it has.  Slot 0 is the instance JSON
+    //! the Pocket's Run list is made of (Assets/theglob/plasticbugs.theglob/),
+    //! one per game, each naming its image; the pattern is the Pleiads
+    //! core's.  The layout is in target/pocket/theglob_mem.sv; change the two
+    //! together.
+    wire        ioctl_isROM = ioctl_download && ioctl_index == 16'h1;
     wire        dl_we       = ioctl_isROM && ioctl_wr;
     wire [24:0] dl_addr     = ioctl_addr[24:0];
     wire  [7:0] dl_data     = ioctl_data;
@@ -938,7 +942,7 @@ module core_top
     //!          downloading, CPU halted, watchdog kicked, fault caught,
     //!          menu open | port 02 as the CPU reads it
     //!   row 1  first fault: kind | the fetch that faulted | faults since
-    //!   row 2  image checksum (EF35 is a good image) | watchdog kicks since
+    //!   row 2  image checksum (EF35 The Glob, 94E5 Super Glob) | watchdog kicks since
     //!          reset, saturating
     //!   row 3  image bytes received (7820 is all of it) | port 01 latch |
     //!          DIP switches

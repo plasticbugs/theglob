@@ -1,0 +1,30 @@
+<misterromdescription>
+    <!--
+        Super Glob: the same board as The Glob (MAME: tristar8000, the same
+        input ports and the same colour PROM), a later program.  The image
+        has theglob.mra's layout exactly, which target/pocket/theglob_mem.sv
+        and sim/tb_mem.cpp assume:
+          0x0000-0x77FF  Z80 program, u10 u9 u8 u7 u6 u5 u4 u11 as MAME loads it
+          0x7800-0x781F  colour PROM 82s123.u66
+        suprglob is the parent set, so its zip carries the PROM itself.
+        Checked against MAME's own regions by tools/verify_rom.py.
+    -->
+    <name>Super Glob</name>
+    <setname>suprglob</setname>
+    <rbf>theglob</rbf>
+    <mameversion>0288</mameversion>
+    <year>1983</year>
+    <manufacturer>Epos Corporation</manufacturer>
+    <switches default="00"/>
+    <rom index="0" zip="suprglob.zip" md5="2343a8416de08fe87c6fa258ec80ab9d">
+        <part name="u10" crc="c0141324"/>
+        <part name="u9"  crc="58be8128"/>
+        <part name="u8"  crc="6d088c16"/>
+        <part name="u7"  crc="b2768203"/>
+        <part name="u6"  crc="976c8f46"/>
+        <part name="u5"  crc="340f5290"/>
+        <part name="u4"  crc="173bd589"/>
+        <part name="u11" crc="d45b740d"/>
+        <part name="82s123.u66" crc="f4f6ddc5"/>
+    </rom>
+</misterromdescription>
