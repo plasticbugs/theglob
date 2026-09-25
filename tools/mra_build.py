@@ -15,9 +15,10 @@ Supported MRA elements (the standard MiSTer subset):
         a run of literal bytes.
   <interleave output="16"> <part name=.. crc=.. map="01"/> ... </interleave>
         byte-interleave several ROMs into 16-bit words. Each digit of `map` is
-        one byte of the output word, left to right; the digit is the 1-based
-        byte of that part in the word ("01" = this ROM supplies byte 1, the
-        second/odd byte; "10" = the first/even byte).
+        one byte of the output word, read RIGHT TO LEFT as the MRA format and
+        mra-tools-c do: the rightmost digit is the word's first byte.  A digit
+        is the 1-based byte of that part in the word ("01" = this ROM supplies
+        the first/even byte; "10" = the second/odd byte).
 
 Nothing but Python 3 is required. The same .mra works with the standard MiSTer
 mra tools.
@@ -122,7 +123,7 @@ def do_interleave(parts, node):
     out = bytearray(n_words * nbytes)
     for label, data, m in sources:
         k = sum(1 for d in m if d != '0')
-        for pos, d in enumerate(m):
+        for pos, d in enumerate(reversed(m)):     # rightmost digit = first byte (MRA standard)
             if d == '0':
                 continue
             src_index = int(d) - 1     # which of this part's k bytes per word
